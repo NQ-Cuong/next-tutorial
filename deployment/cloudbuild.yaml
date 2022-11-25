@@ -1,0 +1,32 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-t','gcr.io/$PROJECT_ID/x10-fun-bo-payment:$COMMIT_SHA',
+      '.'
+    ]
+
+  # Push the image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/x10-fun-bo-payment:$COMMIT_SHA']
+
+#  - name: 'gcr.io/cloud-builders/docker'
+#    args: [ 'push', 'gcr.io/$PROJECT_ID/x10-fun-bo-payment:latest' ]
+
+    # Deploy image to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [
+      'beta', 'run',
+      'deploy', 'x10-fun-bo-payment',
+      '--image', 'gcr.io/$PROJECT_ID/x10-fun-bo-payment:$COMMIT_SHA',
+      '--region', 'asia-southeast1',
+      '--platform', 'managed',
+      '--min-instances', '1',
+      '--port','3000',
+      '--allow-unauthenticated'
+    ]
+
+images:
+  - 'gcr.io/$PROJECT_ID/x10-fun-bo-payment:$COMMIT_SHA'
+#  - 'gcr.io/$PROJECT_ID/x10-fun-bo-payment:latest'
